@@ -1,37 +1,52 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axiosClient from "../axios-client";
+import { Message, MessageBody } from "../services/types";
 
 const api = {
-  getMessages: () =>
+  getMessages: (): Promise<{
+    data: {
+      data: Message[];
+      has_more: boolean;
+    };
+  }> =>
     axiosClient.get("v1/message", {
-      // params: {
-      //   thread_id: "thread_UaiMYsqSHL5GnaFxkPDyNCA4",
-      // },
+      params: {
+        thread_id: "thread_pxfPwS4fH0I6zWwlgM3nMqLS",
+        limit: 100,
+      },
     }),
 
-  getThread: () =>
-    axiosClient.get("v1/thread", {
-      // params: {
-      //   thread_id: "thread_UaiMYsqSHL5GnaFxkPDyNCA4",
-      // },
-    }),
+  createMessage: (body: MessageBody) => axiosClient.post("v1/message", body),
 };
 
 const useMessage = () => {
   return useQuery({
     queryKey: ["message"],
     queryFn: api.getMessages,
+    select: ({ data }) =>
+      data.data
+        .map((message) => {
+          const { content, role, id } = message;
+          return {
+            id,
+            message: content[0].text.value,
+            sender: role === "assistant" ? "Chatbot" : "User",
+            direction: role === "assistant" ? "incoming" : "outgoing",
+          };
+        })
+        .reverse(),
   });
 };
 
-const useThread = () => {
-  return useQuery({
-    queryKey: ["thread"],
-    queryFn: api.getThread,
+const useCreateMessage = () => {
+  return useMutation({
+    mutationFn: api.createMessage,
   });
 };
 
 export const chatQuery = {
   useMessage,
-  useThread,
+  mutation: {
+    useCreateMessage,
+  },
 };
