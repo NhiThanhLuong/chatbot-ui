@@ -3,38 +3,64 @@ import axiosClient from "../axios-client";
 import { Message, MessageBody } from "../services/types";
 
 const api = {
-  getMessages: (): Promise<{
-    data: {
-      data: Message[];
-      has_more: boolean;
-    };
+  createAssistant: (body: {
+    user_id: string;
+  }): Promise<{
+    run_id: string;
+    user_id: string;
   }> =>
-    axiosClient.get("v1/message", {
-      params: {
-        thread_id: "thread_pxfPwS4fH0I6zWwlgM3nMqLS",
-        limit: 100,
-      },
+    axiosClient.post("assistants/create", {
+      ...body,
+      assistant: "RAG_PDF",
     }),
 
-  createMessage: (body: MessageBody) => axiosClient.post("v1/message", body),
+  getMessages: (
+    body: Partial<{ run_id: string | null; user_id: string | null }>
+  ): Promise<Message[]> =>
+    axiosClient.post("assistants/history", {
+      ...body,
+      assistant: "RAG_PDF",
+    }),
+
+  createMessage: (body: MessageBody) =>
+    axiosClient.post("assistants/chat", {
+      ...body,
+      stream: true,
+      assistant: "RAG_PDF",
+    }),
 };
 
-const useMessage = () => {
+const useMessage = (
+  body: Partial<{ run_id: string | null; user_id: string | null }>
+) => {
   return useQuery({
-    queryKey: ["message"],
-    queryFn: api.getMessages,
-    select: ({ data }) =>
-      data.data
-        .map((message) => {
-          const { content, role, id } = message;
-          return {
-            id,
-            message: content[0].text.value,
-            sender: role === "assistant" ? "Chatbot" : "User",
-            direction: role === "assistant" ? "incoming" : "outgoing",
-          };
-        })
-        .reverse(),
+    queryKey: ["message", body],
+    queryFn: () => api.getMessages(body),
+    enabled: !!body.run_id && !!body.user_id,
+    select(data) {
+      return data.map((message) => {
+        const { content, role } = message;
+
+        return {
+          message: content,
+          sender: role === "assistant" ? "Chatbot" : "User",
+          direction: role === "assistant" ? "incoming" : "outgoing",
+        };
+      });
+    },
+    // select: ({ data }) =>
+    //   data.data
+    //     .map((message) => {
+    //       const { content, role, id } = message;
+
+    //       return {
+    //         id,
+    //         message: escapeHtml(content[0].text.value),
+    //         sender: role === "assistant" ? "Chatbot" : "User",
+    //         direction: role === "assistant" ? "incoming" : "outgoing",
+    //       };
+    //     })
+    //     .reverse(),
   });
 };
 
@@ -44,9 +70,16 @@ const useCreateMessage = () => {
   });
 };
 
+const useCreateAssistant = () => {
+  return useMutation({
+    mutationFn: api.createAssistant,
+  });
+};
+
 export const chatQuery = {
   useMessage,
   mutation: {
     useCreateMessage,
+    useCreateAssistant,
   },
 };

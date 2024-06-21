@@ -1,13 +1,9 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL:
-    "http://a63b08641a04348858b07d0c71ac3eba-733487664.ap-southeast-1.elb.amazonaws.com:3000",
-  // baseURL: "http://localhost:3000",
+  baseURL: "https://a0d6-222-253-82-244.ngrok-free.app/v1",
   headers: {
     "Content-Type": "application/json",
-    // "Access-Control-Allow-Origin": "*",
-    // "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
   },
 });
 
@@ -23,11 +19,11 @@ axiosClient.interceptors.request.use(
     }
 
     return config;
+  },
+  function (error) {
+    // Do something with request error
+    return Promise.reject(error);
   }
-  // function (error) {
-  //   // Do something with request error
-  //   return Promise.reject(error);
-  // }
 );
 
 // Add a response interceptor
