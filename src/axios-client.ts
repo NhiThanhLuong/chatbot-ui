@@ -10,16 +10,7 @@ const axiosClient = axios.create({
 // Interceptors
 // Add a request interceptor
 axiosClient.interceptors.request.use(
-  function (config) {
-    // Do something before request is sent
-    const token =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjp7InVzZXJfaWQiOiIwMThmZTJjOS1kOGZmLTdhZTctOTEwOC0xYTAzZThlYTU1ZDEiLCJyb2xlIjoidXNlciIsInNlc3Npb25faWQiOiJTeFNaREtxdGFRZGxOWWV3VmdnQyJ9LCJleHAiOjE3MzMyNjQ4MzQsImlhdCI6MTcxNzQ5NjgzNH0.BlXkkIFDEVOSxuTGzUMOW25VCdWX-AmKmaCm0TtLqoE";
-    if (token) {
-      config.headers["Authorization"] = "Bearer " + token;
-    }
-
-    return config;
-  },
+  (config) => config,
   function (error) {
     // Do something with request error
     return Promise.reject(error);

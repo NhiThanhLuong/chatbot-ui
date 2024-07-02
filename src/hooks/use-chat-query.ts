@@ -48,19 +48,6 @@ const useMessage = (
         };
       });
     },
-    // select: ({ data }) =>
-    //   data.data
-    //     .map((message) => {
-    //       const { content, role, id } = message;
-
-    //       return {
-    //         id,
-    //         message: escapeHtml(content[0].text.value),
-    //         sender: role === "assistant" ? "Chatbot" : "User",
-    //         direction: role === "assistant" ? "incoming" : "outgoing",
-    //       };
-    //     })
-    //     .reverse(),
   });
 };
 

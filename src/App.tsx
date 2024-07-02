@@ -9,7 +9,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
-import "@fortawesome/fontawesome-free/css/all.min.css"; // Import Font Awesome
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { chatQuery } from "./hooks/use-chat-query";
@@ -18,7 +18,7 @@ const App = () => {
   const [userId, setUserId] = useState(() => localStorage.getItem("userId"));
   const [runId, setRunId] = useState(() => localStorage.getItem("runId"));
 
-  const hasUniqId = !!(runId && userId);
+  // const hasUniqId = !!(runId && userId);
 
   const createAssistantMutation = chatQuery.mutation.useCreateAssistant();
   const createMessageMutation = chatQuery.mutation.useCreateMessage();
@@ -32,7 +32,12 @@ const App = () => {
       return;
     }
 
-    if ((userId && runId) || createAssistantMutation.isPending) return;
+    if (
+      (userId && runId) ||
+      createAssistantMutation.isPending ||
+      createAssistantMutation.isError
+    )
+      return;
 
     const uniqId = uuidv4();
 
@@ -73,15 +78,6 @@ const App = () => {
 
   const [newMessage, setNewMessage] = useState<string>();
 
-  // const [_, setMessages] = useState([
-  // {
-  //   message: "Hello, how can I help you?",
-  //   sentTime: "just now",
-  //   sender: "ChatBot",
-  //   direction: "incoming", // Thêm thuộc tính direction để xác định hướng tin nhắn
-  // },
-  // ]);
-  // const [typing, setTyping] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleSend = async (message: string) => {
@@ -97,39 +93,12 @@ const App = () => {
         onSuccess() {
           refetch();
           setNewMessage(undefined);
-          // setTyping(false);
-
-          // setTyping(true);
-          // setTimeout(() => {
-          //   refetch();
-          //   setNewMessage(undefined);
-          //   setTyping(false);
-          // }, 3000);
         },
       }
     );
-
-    // setMessages((prevMessages) => [
-    //   ...prevMessages,
-    //   { message, sentTime: "just now", sender: "User", direction: "outgoing" },
-    // ]);
-    // // Fake a bot response
-    // setTyping(true);
-    // setTimeout(() => {
-    //   setMessages((prevMessages) => [
-    //     ...prevMessages,
-    //     {
-    //       message: "I'm here to assist you!",
-    //       sentTime: "just now",
-    //       sender: "ChatBot",
-    //       direction: "incoming",
-    //     },
-    //   ]);
-    //   setTyping(false);
-    // }, 1000);
   };
 
-  return hasUniqId ? (
+  return (
     <div>
       {isChatOpen ? (
         <div className="chat-container">
@@ -193,7 +162,7 @@ const App = () => {
         </button>
       )}
     </div>
-  ) : null;
+  );
 };
 
 export default App;
